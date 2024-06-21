@@ -36,3 +36,31 @@
     transform: rotate(360deg);
   }
 }
+
+.custom {
+  width: 70px !important;
+  font-size: 12px;
+}
+
+.login-custom {
+  width: 700px !important;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  z-index: 1050;
+}
+
+.modal-content {
+  background-color: white; /* White background for modal content */
+}
+.card-header,
+.card-body {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
