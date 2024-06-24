@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import Axios from "axios";
 
-const ExcelDownloadComponent = () => {
+const FilteredExcelDownloadComponent = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -34,11 +34,7 @@ const ExcelDownloadComponent = () => {
     }
 
     // Filter data to include only title and author
-    const filteredData = data.map(({ title, author, department }) => ({
-      title,
-      author,
-      department,
-    }));
+    const filteredData = data.map(({ title, author }) => ({ title, author }));
 
     // Create a new workbook
     const wb = XLSX.utils.book_new();
@@ -68,4 +64,4 @@ const ExcelDownloadComponent = () => {
   );
 };
 
-export default ExcelDownloadComponent;
+export default FilteredExcelDownloadComponent;

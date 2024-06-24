@@ -64,3 +64,24 @@
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
 }
+
+input[type="date"]::before {
+  color: #999;
+  content: attr(placeholder);
+  margin-right: 122px;
+}
+input[type="date"]:focus::before {
+  content: "" !important;
+  display: none;
+}
+
+#birthdaytime::placeholder {
+  color: #999; /* Example color */
+  font-style: italic; /* Example style */
+}
+
+.divider {
+  height: 1px;
+  background-color: #ccc; /* Adjust color of the line */
+  margin: 10px 0; /* Adjust spacing around the line */
+}
