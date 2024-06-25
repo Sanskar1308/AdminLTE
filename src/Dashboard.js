@@ -9,7 +9,7 @@ import { saveAs } from "file-saver";
 
 const Dashboard = () => {
   const [bookList, setBookList] = useState([]);
-  const [products, setProducts] = useState(bookList);
+  const [products, setProducts] = useState([]);
   const [author, setAuthor] = useState("");
   const [title, setTitle] = useState("");
   const [uploadedData, setUploadedData] = useState();
@@ -27,7 +27,6 @@ const Dashboard = () => {
   const [filterDepartment, setFilterDepartment] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [fullList, setfullList] = useState("");
 
   Axios.interceptors.request.use(
     (config) => {
@@ -58,16 +57,6 @@ const Dashboard = () => {
       });
   };
 
-  useEffect(() => {
-    Axios.get("http://localhost:3001/collection").then((res) => {
-      setBookList(res.data.resultCollection);
-      setProducts(res.data.resultCollection);
-      setfullList(res.data.resultCollection);
-      if (res.data.pageCount) {
-        setPageCount(res.data.pageCount);
-      }
-    });
-  }, []);
   const addToList = (event) => {
     event.preventDefault();
     Axios.post("http://localhost:3001/collection", {
@@ -77,7 +66,7 @@ const Dashboard = () => {
     })
       .then((response) => {
         console.log(response.data);
-        fetchBookList(); // Refresh the book list after adding a new one
+        fetchBookList();
       })
       .catch((error) => {
         console.error("Error adding to collection:", error);
@@ -92,7 +81,7 @@ const Dashboard = () => {
     })
       .then((response) => {
         console.log(response.data);
-        fetchBookList(); // Refresh the book list after updating
+        fetchBookList();
         togglePopup(); // Close the popup after successful update
       })
       .catch((error) => {
@@ -198,43 +187,35 @@ const Dashboard = () => {
     setStartDate("");
     setEndDate("");
     setFilterDepartment("");
-    setLimit(5);
-    setPage(1);
-
-    fetchBookList();
+    fetchBookList(page, limit);
   }
 
-  async function handleSearchClick() {
-    if (!filterDepartment && !startDate && !endDate) {
-      setProducts(fullList);
-      return;
+  const handleSearchClick = async () => {
+    try {
+      const response = await Axios.get("http://localhost:3001/filteredData", {
+        params: {
+          department: filterDepartment || "",
+          startDate: startDate ? new Date(startDate).toISOString() : "",
+          endDate: endDate ? new Date(endDate).toISOString() : "",
+        },
+      });
+      setProducts(response.data);
+      setBookList(response.data);
+      setPage(1);
+      const newLimit =
+        response.data.length > limit ? response.data.length : limit;
+      setLimit(newLimit);
+      console.log(newLimit);
+      // Calculate the new page count based on the updated limit
+      const newPageCount = Math.ceil(response.data.length / newLimit);
+      setPageCount(newPageCount);
+
+      console.log("filter product here", response.data);
+    } catch (error) {
+      console.error("Error fetching filtered data", error);
+      // Handle error (e.g., show error message to user)
     }
-
-    const filterBySearch = fullList.filter((book) => {
-      const matchesDepartment = filterDepartment
-        ? book.department.toLowerCase() === filterDepartment.toLowerCase()
-        : true;
-
-      // Convert the book.create_at to a Date object
-      const bookCreatedAt = new Date(book.created_at);
-      // Adjust the created date to Indian Standard Time (IST)
-      const adjustedBookCreatedAt = new Date(
-        bookCreatedAt.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-      );
-
-      // Compare the created date with startDate and endDate
-      const matchesStartDate = startDate
-        ? adjustedBookCreatedAt >= new Date(startDate)
-        : true;
-      const matchesEndDate = endDate
-        ? adjustedBookCreatedAt <= new Date(endDate)
-        : true;
-
-      return matchesDepartment && matchesStartDate && matchesEndDate;
-    });
-
-    setProducts(filterBySearch);
-  }
+  };
 
   const handleFilteredDownloadExcel = () => {
     if (products.length === 0) {
@@ -336,6 +317,16 @@ const Dashboard = () => {
     };
     return date.toLocaleString("en-IN", options);
   }
+
+  useEffect(() => {
+    Axios.get("http://localhost:3001/collection").then((res) => {
+      setBookList(res.data.resultCollection);
+      setProducts(res.data.resultCollection);
+      if (res.data.pageCount) {
+        setPageCount(res.data.pageCount);
+      }
+    });
+  }, []);
 
   return (
     <div className="content-wrapper ">
@@ -481,7 +472,7 @@ const Dashboard = () => {
                             ></input>
                           </div>
                           <div className="d-block">
-                            <p>Give Product Information</p>
+                            <p className="">Actions</p>
                             <div className="d-flex">
                               <div className="input-group-append">
                                 <button
